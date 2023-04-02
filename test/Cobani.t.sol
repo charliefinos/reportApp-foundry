@@ -17,7 +17,8 @@ contract CounterTest is Test {
     // Can be used any number or a real address to fork
     address user1 = address(1);
     address user2 = address(2);
-    address worker1 = address(3);
+    address user3 = address(3);
+    address worker1 = address(4);
 
     string ipfsHashExample = "QmeB8iX7UWK4JLMxRPSAhShH2tc9mUkmGodD5CqeJpGfk6";
 
