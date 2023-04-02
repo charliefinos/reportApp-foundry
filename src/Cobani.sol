@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract Cobani is Ownable {
+contract Cobani is Ownable, AccessControl {
     mapping(address => Infraction) public infractions;
 
     bytes32 public constant WORKER_ROLE = keccak256("WORKER_ROLE");
