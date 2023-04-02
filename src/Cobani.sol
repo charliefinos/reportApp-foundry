@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
+
+/// @title Cobani
+/// @notice this contract is used to verify infractions
+/// @author @charliefinos
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -25,7 +29,12 @@ contract Cobani is Ownable, AccessControl {
         _;
     }
 
-    event InfractionSubmitted(bytes32 ipfsHash, address userAddress);
+    event InfractionSubmitted(bytes32 ipfsHash, address cobaniAddress);
+    event InfractionVerified(
+        bytes32 ipfsHash,
+        address cobaniAddress,
+        address workerAddress
+    );
 
     error InfractionPendingVerification(address cobaniAddress);
     error InfractionDoesNotExist(address cobaniAddress);
@@ -77,6 +86,12 @@ contract Cobani is Ownable, AccessControl {
         if (!isAccepted) {
             delete infractions[cobaniAddress];
         }
+
+        emit InfractionVerified(
+            infractions[cobaniAddress].ipfsHash,
+            cobaniAddress,
+            msg.sender
+        );
     }
 
     // @notice this function reads an existing infraction
