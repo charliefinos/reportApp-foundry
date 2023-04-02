@@ -8,17 +8,6 @@ contract Cobani is Ownable {
 
     uint256 public infractionCount;
 
-    event InfractionSubmitted(
-        bytes32 ipfsHash,
-        uint256 id,
-        address userAddress
-    );
-
-    error InfractionAlreadyExists(address cobaniAddress);
-    error InfractionPendingVerification(address cobaniAddress);
-    error InfractionDoesNotExist(address cobaniAddress);
-    error InfractionAlreadyVerified(address cobaniAddress);
-
     /// @notice this struct is used to store an infraction
     /// @dev accepted bool is valid only if verified is true
     struct Infraction {
@@ -28,6 +17,12 @@ contract Cobani is Ownable {
         bool accepted;
     }
 
+    event InfractionSubmitted(bytes32 ipfsHash, address userAddress);
+
+    error InfractionPendingVerification(address cobaniAddress);
+    error InfractionDoesNotExist(address cobaniAddress);
+    error InfractionAlreadyVerified(address cobaniAddress);
+
     constructor() {}
 
     /// @notice this function is used to submit an infraction
@@ -35,7 +30,7 @@ contract Cobani is Ownable {
     /// @param _ipfsHash the hash of the infraction
     function submitInfraction(string memory _ipfsHash) public {
         if (infractions[msg.sender].timestamp != 0) {
-            revert InfractionPendingVerification(ipfsHash);
+            revert InfractionPendingVerification(msg.sender);
         }
 
         bytes32 ipfsHash = keccak256(abi.encodePacked(_ipfsHash));
@@ -66,28 +61,26 @@ contract Cobani is Ownable {
             revert InfractionAlreadyVerified(cobaniAddress);
         }
 
-        Infractions storage infraction = infractions[cobaniAddress];
+        Infraction storage _infraction = infractions[cobaniAddress];
 
-        infraction.verified = true;
+        _infraction.verified = true;
 
         if (isAccepted) {
-            infraction.accepted = true;
+            _infraction.accepted = true;
         } else {
-            delete infraction;
+            delete infractions[cobaniAddress];
         }
     }
 
     // @notice this function reads an existing infraction
     // @param _ipfsHash the hash of the infraction
     function getInfraction(
-        string memory _ipfsHash
+        address cobaniAddress
     ) public view returns (Infraction memory) {
-        bytes32 ipfsHash = keccak256(abi.encodePacked(_ipfsHash));
-
-        if (infractions[ipfsHash].timestamp == 0) {
-            revert InfractionDoesNotExist(ipfsHash);
+        if (infractions[cobaniAddress].timestamp == 0) {
+            revert InfractionDoesNotExist(cobaniAddress);
         }
 
-        return infractions[ipfsHash];
+        return infractions[cobaniAddress];
     }
 }

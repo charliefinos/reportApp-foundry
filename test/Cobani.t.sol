@@ -35,7 +35,7 @@ contract CounterTest is Test {
         cobani.submitInfraction(ipfsHashExample);
         vm.stopPrank();
 
-        (bytes32 hashh, , , ) = cobani.infractions(ipfsHashExampleBytes);
+        (bytes32 hashh, , , ) = cobani.infractions(user1);
 
         assertEq(hashh, ipfsHashExampleBytes);
     }
