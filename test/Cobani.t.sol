@@ -38,5 +38,11 @@ contract CounterTest is Test {
         (bytes32 hashh, , , ) = cobani.infractions(user1);
 
         assertEq(hashh, ipfsHashExampleBytes);
+        // Check event submited
+
+        // Check that the user can't submit another infraction
+        vm.prank(user1);
+        vm.expectRevert();
+        cobani.submitInfraction(ipfsHashExample);
     }
 }
