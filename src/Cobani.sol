@@ -72,10 +72,9 @@ contract Cobani is Ownable, AccessControl {
         Infraction storage _infraction = infractions[cobaniAddress];
 
         _infraction.verified = true;
+        _infraction.accepted = isAccepted;
 
-        if (isAccepted) {
-            _infraction.accepted = true;
-        } else {
+        if (!isAccepted) {
             delete infractions[cobaniAddress];
         }
     }
