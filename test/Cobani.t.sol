@@ -16,6 +16,8 @@ contract CounterTest is Test {
     // Create a user wallet
     // Can be used any number or a real address to fork
     address user1 = address(1);
+    address user2 = address(2);
+    address worker1 = address(3);
 
     string ipfsHashExample = "QmeB8iX7UWK4JLMxRPSAhShH2tc9mUkmGodD5CqeJpGfk6";
 
@@ -27,6 +29,11 @@ contract CounterTest is Test {
 
         // Give user1 some ether
         vm.deal(user1, 1 ether);
+
+        // Give worker role to address(2)
+        cobani.setWorkerRole(worker1);
+
+        assertEq(cobani.hasWorkerRole(worker1), true);
     }
 
     function testSubmitInfraction() public {
@@ -44,5 +51,45 @@ contract CounterTest is Test {
         vm.prank(user1);
         vm.expectRevert();
         cobani.submitInfraction(ipfsHashExample);
+    }
+
+    function testVerifyInfractionTrue() public {
+        // Submit infraction as user1
+        vm.startPrank(user1);
+        cobani.submitInfraction(ipfsHashExample);
+        vm.stopPrank();
+
+        // Connect as worker1
+        // Verify infraction of user1 as valid
+        vm.startPrank(worker1);
+        cobani.verifyInfraction(user1, true);
+        vm.stopPrank();
+
+        (, , bool verified, bool accepted) = cobani.infractions(user1);
+
+        assertEq(verified, true);
+        assertEq(accepted, true);
+    }
+
+    function testVerifyInfractionFalse() public {
+        // Submit infraction as user2
+        vm.startPrank(user2);
+        cobani.submitInfraction(ipfsHashExample);
+        vm.stopPrank();
+
+        // Connect as worker address(2)
+        // Verify infraction of user2 as invalid
+        vm.startPrank(worker1);
+        cobani.verifyInfraction(user2, false);
+        vm.stopPrank();
+
+        (, uint256 timestamp, bool verified, bool accepted) = cobani
+            .infractions(user2);
+
+        assertEq(timestamp == 0, true);
+
+        // Verified will be false because the infraction was rejected and struct was deleted
+        assertEq(verified, false);
+        assertEq(accepted, false);
     }
 }
