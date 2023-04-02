@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/Cobani.sol";
+import "../src/ReportApp.sol";
 
 // user should be able to upload an infraction
 // worker should be able to see all submited infractions
@@ -11,7 +11,7 @@ import "../src/Cobani.sol";
 // user should be able to withdraw funds after infraction is verified
 
 contract CounterTest is Test {
-    Cobani public cobani;
+    ReportApp public reportApp;
 
     // Create a user wallet
     // Can be used any number or a real address to fork
@@ -26,24 +26,24 @@ contract CounterTest is Test {
 
     function setUp() public {
         // Initialize the contract
-        cobani = new Cobani();
+        reportApp = new ReportApp();
 
         // Give user1 some ether
         vm.deal(user1, 1 ether);
 
         // Give worker role to address(2)
-        cobani.setWorkerRole(worker1);
+        reportApp.setWorkerRole(worker1);
 
-        assertEq(cobani.hasWorkerRole(worker1), true);
+        assertEq(reportApp.hasWorkerRole(worker1), true);
     }
 
     function testSubmitInfraction() public {
         // Connect as user1
         vm.startPrank(user1);
-        cobani.submitInfraction(ipfsHashExample);
+        reportApp.submitInfraction(ipfsHashExample);
         vm.stopPrank();
 
-        (bytes32 hashh, , , ) = cobani.infractions(user1);
+        (bytes32 hashh, , , ) = reportApp.infractions(user1);
 
         assertEq(hashh, ipfsHashExampleBytes);
         // Check event submited
@@ -51,22 +51,22 @@ contract CounterTest is Test {
         // Check that the user can't submit another infraction
         vm.prank(user1);
         vm.expectRevert();
-        cobani.submitInfraction(ipfsHashExample);
+        reportApp.submitInfraction(ipfsHashExample);
     }
 
     function testVerifyInfractionTrue() public {
         // Submit infraction as user1
         vm.startPrank(user1);
-        cobani.submitInfraction(ipfsHashExample);
+        reportApp.submitInfraction(ipfsHashExample);
         vm.stopPrank();
 
         // Connect as worker1
         // Verify infraction of user1 as valid
         vm.startPrank(worker1);
-        cobani.verifyInfraction(user1, true);
+        reportApp.verifyInfraction(user1, true);
         vm.stopPrank();
 
-        (, , bool verified, bool accepted) = cobani.infractions(user1);
+        (, , bool verified, bool accepted) = reportApp.infractions(user1);
 
         assertEq(verified, true);
         assertEq(accepted, true);
@@ -75,16 +75,16 @@ contract CounterTest is Test {
     function testVerifyInfractionFalse() public {
         // Submit infraction as user2
         vm.startPrank(user2);
-        cobani.submitInfraction(ipfsHashExample);
+        reportApp.submitInfraction(ipfsHashExample);
         vm.stopPrank();
 
         // Connect as worker address(2)
         // Verify infraction of user2 as invalid
         vm.startPrank(worker1);
-        cobani.verifyInfraction(user2, false);
+        reportApp.verifyInfraction(user2, false);
         vm.stopPrank();
 
-        (, uint256 timestamp, bool verified, bool accepted) = cobani
+        (, uint256 timestamp, bool verified, bool accepted) = reportApp
             .infractions(user2);
 
         assertEq(timestamp == 0, true);

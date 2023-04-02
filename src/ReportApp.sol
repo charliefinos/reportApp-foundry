@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-/// @title Cobani
+/// @title reportApp
 /// @notice this contract is used to verify infractions
 /// @author @charliefinos
 pragma solidity ^0.8.13;
@@ -8,7 +8,7 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract Cobani is Ownable, AccessControl {
+contract ReportApp is Ownable, AccessControl {
     mapping(address => Infraction) public infractions;
 
     bytes32 public constant WORKER_ROLE = keccak256("WORKER_ROLE");
@@ -29,16 +29,16 @@ contract Cobani is Ownable, AccessControl {
         _;
     }
 
-    event InfractionSubmitted(bytes32 ipfsHash, address cobaniAddress);
+    event InfractionSubmitted(bytes32 ipfsHash, address reportAppAddress);
     event InfractionVerified(
         bytes32 ipfsHash,
-        address cobaniAddress,
+        address reportAppAddress,
         address workerAddress
     );
 
-    error InfractionPendingVerification(address cobaniAddress);
-    error InfractionDoesNotExist(address cobaniAddress);
-    error InfractionAlreadyVerified(address cobaniAddress);
+    error InfractionPendingVerification(address reportAppAddress);
+    error InfractionDoesNotExist(address reportAppAddress);
+    error InfractionAlreadyVerified(address reportAppAddress);
 
     constructor() {}
 
@@ -67,29 +67,29 @@ contract Cobani is Ownable, AccessControl {
     /// @notice this function is used for state worker to verify an infraction
     /// @dev we should consider adding access control
     function verifyInfraction(
-        address cobaniAddress,
+        address reportAppAddress,
         bool isAccepted
     ) public onlyWorker {
-        if (infractions[cobaniAddress].timestamp == 0) {
-            revert InfractionDoesNotExist(cobaniAddress);
+        if (infractions[reportAppAddress].timestamp == 0) {
+            revert InfractionDoesNotExist(reportAppAddress);
         }
 
-        if (infractions[cobaniAddress].verified) {
-            revert InfractionAlreadyVerified(cobaniAddress);
+        if (infractions[reportAppAddress].verified) {
+            revert InfractionAlreadyVerified(reportAppAddress);
         }
 
-        Infraction storage _infraction = infractions[cobaniAddress];
+        Infraction storage _infraction = infractions[reportAppAddress];
 
         _infraction.verified = true;
         _infraction.accepted = isAccepted;
 
         if (!isAccepted) {
-            delete infractions[cobaniAddress];
+            delete infractions[reportAppAddress];
         }
 
         emit InfractionVerified(
-            infractions[cobaniAddress].ipfsHash,
-            cobaniAddress,
+            infractions[reportAppAddress].ipfsHash,
+            reportAppAddress,
             msg.sender
         );
     }
@@ -97,13 +97,13 @@ contract Cobani is Ownable, AccessControl {
     // @notice this function reads an existing infraction
     // @param _ipfsHash the hash of the infraction
     function getInfraction(
-        address cobaniAddress
+        address reportAppAddress
     ) public view returns (Infraction memory) {
-        if (infractions[cobaniAddress].timestamp == 0) {
-            revert InfractionDoesNotExist(cobaniAddress);
+        if (infractions[reportAppAddress].timestamp == 0) {
+            revert InfractionDoesNotExist(reportAppAddress);
         }
 
-        return infractions[cobaniAddress];
+        return infractions[reportAppAddress];
     }
 
     function setWorkerRole(address workerAddress) public onlyOwner {
