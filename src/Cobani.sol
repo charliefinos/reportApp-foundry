@@ -2,9 +2,12 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract Cobani is Ownable {
     mapping(address => Infraction) public infractions;
+
+    bytes32 public constant WORKER_ROLE = keccak256("WORKER_ROLE");
 
     uint256 public infractionCount;
 
@@ -15,6 +18,11 @@ contract Cobani is Ownable {
         uint256 timestamp;
         bool verified;
         bool accepted;
+    }
+
+    modifier onlyWorker() {
+        require(hasRole(WORKER_ROLE, msg.sender), "Caller is not a worker");
+        _;
     }
 
     event InfractionSubmitted(bytes32 ipfsHash, address userAddress);
@@ -52,7 +60,7 @@ contract Cobani is Ownable {
     function verifyInfraction(
         address cobaniAddress,
         bool isAccepted
-    ) public onlyOwner {
+    ) public onlyWorker {
         if (infractions[cobaniAddress].timestamp == 0) {
             revert InfractionDoesNotExist(cobaniAddress);
         }
@@ -82,5 +90,9 @@ contract Cobani is Ownable {
         }
 
         return infractions[cobaniAddress];
+    }
+
+    function setWorkerRole(address workerAddress) public onlyOwner {
+        _setupRole(WORKER_ROLE, workerAddress);
     }
 }
