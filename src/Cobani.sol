@@ -95,4 +95,8 @@ contract Cobani is Ownable {
     function setWorkerRole(address workerAddress) public onlyOwner {
         _setupRole(WORKER_ROLE, workerAddress);
     }
+
+    function hasWorkerRole(address workerAddress) public view returns (bool) {
+        return hasRole(WORKER_ROLE, workerAddress);
+    }
 }
